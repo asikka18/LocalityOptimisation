@@ -1,0 +1,155 @@
+/**********************************************************
+* HW 3: locality
+* CS 40
+* README
+* Name: Armaan Sikka & Nate Pfeffer
+* UTLN: asikka01 & npfeff01
+* Date Started: 10/08/24
+*********************************************************/
+
+# Help Received
+## OH Help
+        OH were used once. Our TA was Bill. We asked about the methods suite
+        and the map function and clarified what the given code was doing and
+        what we needed to do.
+
+## Other Resources Used
+        Used ChatGPT for help with debugging, valgrind errors, and to format
+        the table used below in Part E.
+
+# Correctly Implemented vs Incorrectly Implemented
+        We think most of our program is correctly implemented. However, the
+        only solution to the map function that we implemented for our
+        uarray2b.c included quad-nested for-loops, of which we did not work on
+        finding a better solution to due to time restraints.
+
+# Architecture of our Solution
+        Our UArray2b implementation is based on storing all the data in a
+        single array and using math to iterate over it to find specific
+        indices. The architecture of the UArray2b was very similar to the
+        plain. We made sure that when we were mapping the blocked array that
+        we iterated the blocks in column major (the same way we implemented
+        our UArray2 program) and then iterated within the blocks in row major.
+
+        For the implementation of the a2plain, we essentially copied the
+        a2blocked implementation and changed what we needed to according to
+        our UArray2 implementation that we imported from iii.
+
+        We had separate apply functions for each transformation that we needed
+        to do, including rotate 0, 90, 180, and 270, flip horizontal and
+        vertical, and transpose. We also had separate functions that handled
+        either rotations or tranformations (transpose and flip).
+
+        We have a separate time_output function that deals with outputting time
+        information that we recorded of our transform and rotation functions.
+
+# Part E
+Image: /comp/40/bin/images/large/mobo.ppm
+Size: 8160 x 6120
+
+| Operation             | -col-major     | -row-major     | -block-major   |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 0              | 1654987348 ns  | 4387090590 ns  | 2826398749 ns  |
+| Rotate 0 per pixel    | 33 ns          | 88 ns          | 57 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 90             | 3747575036 ns  | 2674213674 ns  | 2860781978 ns  |
+| Rotate 90 per pixel   | 75 ns          | 54 ns          | 57 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 180            | 1715260052 ns  | 4577982749 ns  | 2889992916 ns  |
+| Rotate 180 per pixel  | 34 ns          | 92 ns          | 58 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 270            | 3858193723 ns  | 2650180991 ns  | 2911491517 ns  |
+| Rotate 270 per pixel  | 77 ns          | 53 ns          | 58 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Flip horizontally     | 1675456818 ns  | 4691553105 ns  | 2827254998 ns  |
+| Flip horizontally/pix | 34 ns          | 94 ns          | 57 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Flip vertically       | 1728439502 ns  | 4424940397 ns  | 2825938294 ns  |
+| Flip vertically/pixel | 35 ns          | 89 ns          | 57 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Transpose             | 3844665646 ns  | 2646042111 ns  | 2943109636 ns  |
+| Transpose per pixel   | 77 ns          | 53 ns          | 59 ns          |
+
+
+Image: /comp/40/bin/images/large/from-wind-cave.jpg -- scaled 20 times
+Size: 16320 x 9160
+
+| Operation             | -col-major     | -row-major     | -block-major   |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 0              | 5102540350 ns  | 14845171803 ns | 8599985181 ns  |
+| Rotate 0 per pixel    | 34 ns          | 99 ns          | 58 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 90             | 13310068281 ns | 8785081964 ns  | 8768747488 ns  |
+| Rotate 90 per pixel   | 89 ns          | 59 ns          | 59 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 180            | 5275160608 ns  | 14897566922 ns | 8732418672 ns  |
+| Rotate 180 per pixel  | 35 ns          | 100 ns         | 58 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Rotate 270            | 12832074324 ns | 8949081787 ns  | 8966694777 ns  |
+| Rotate 270 per pixel  | 86 ns          | 60 ns          | 60 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Flip vertically       | 5193654189 ns  | 14796809721 ns | 8587844531 ns  |
+| Flip vertically/pixel | 35 ns          | 99 ns          | 57 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Flip horizontally     | 5115501321 ns  | 14528586631 ns | 8756570282 ns  |
+| Flip horizontally/pix | 34 ns          | 97 ns          | 59 ns          |
+|-----------------------|----------------|----------------|----------------|
+| Transpose             | 13469883228 ns | 8810434928 ns  | 8962302350 ns  |
+| Transpose per pixel   | 90 ns          | 59 ns          | 60 ns          |
+
+
+        Determining the number of instructions executed per pixel can be done
+        simply by looking at the number of nanoseconds per pixel. This is
+        because there are 1,000,000 nanoseconds in 1 second, so 1,000,000
+        instructions per second is equivalent to 1 instruction per
+        nanosecond.
+
+        We ran these tests on a Samsung Galaxy Book 2 Pro. Its processor is
+        "12th Gen Intel(R) Core(TM) i7-1260P" with a clock rate of 2.10 GHz.
+
+
+# Patterns:
+
+        Comparing the larger image to the smaller, most of the time to execute
+        per pixel was almost the same, yet slightly higher. This makes sense 
+        as our smaller image was already pretty large. Thus, the unavoidable 
+        fixed overhead executions do not have a significant impact on each
+        pixel.
+
+        Our column-major mapping for rotate 0, 180, and both flips was the 
+        quickest of any of the transformations. This occurs because our
+        plain 2D array used column major format, making reading and 
+        writing efficient as the indices we were accessing were closer
+        in memory. 
+
+        The rotate 90 and 270 and the transpose operations took longer in
+        col-major than row-major because we were mapping through the new array
+        (which had the height and width switched from the original array) and
+        finding the specific indices from the original array. This meant less
+        frequent reads and writes from memory close together for the col-major
+        mapping because the index that we had to copy from the original array
+        into the new array was not necessarily the next index in the array.
+        Thus, we were not accessing elements of columns in succession, making
+        it less efficient.
+
+        The vice versa applies to the row-major mapping because our array
+        storing the image under the hood as column major.
+
+        With the block-major implementation, we can see that it is more
+        consistent for all the operations. The transformations seem more
+        consistent because we are always accessing and writing in blocks,
+        rather than indices in either a row or column.
+        It is slower than col-major in some transformation operations and
+        faster than row-major in some transformation operations. It's slower
+        than most col-major transformation operations because it isn't always
+        accessing memory that is adjacent. We also found that block-major is
+        equal to row-major's fastest transformations and faster than its
+        slowest.
+
+        Lastly, row-major mapping for rotate 0, 180 and both flips were the 
+        slowest transformations. Since our plain UArray2 was stored column
+        major and the transformations required moving rows around, there would
+        rarely be times where indices accessed were close by were accessed.
+
+# Hours Spent
+        Approx 21 hours
